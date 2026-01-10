@@ -48,7 +48,7 @@ a {
 
 .logo {
   font-family: "Cormorant Garamond", serif;
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -84,6 +84,12 @@ a {
   font-size: clamp(36px, 4vw, 56px);
   line-height: 1.1;
   margin-bottom: 18px;
+}
+
+.hero-brand {
+  display: block;
+  font-size: clamp(44px, 6vw, 76px);
+  letter-spacing: 2px;
 }
 
 .eyebrow {
