@@ -123,6 +123,12 @@ a {
   color: #fff;
 }
 
+.button.whatsapp {
+  background: #25d366;
+  border-color: #25d366;
+  color: #fff;
+}
+
 .button.ghost {
   background: transparent;
 }
