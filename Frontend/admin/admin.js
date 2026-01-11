@@ -23,8 +23,16 @@ const summaryPayment = document.getElementById("summary-payment");
 const summaryDayTotal = document.getElementById("summary-day-total");
 const summaryDayTax = document.getElementById("summary-day-tax");
 const summaryDayCount = document.getElementById("summary-day-count");
+const summaryMonthTotal = document.getElementById("summary-month-total");
+const summaryMonthTax = document.getElementById("summary-month-tax");
+const summaryMonthCount = document.getElementById("summary-month-count");
 const recentList = document.getElementById("recent-list");
 const signOutButton = document.getElementById("sign-out");
+const dailyTableBody = document.getElementById("daily-table-body");
+const exportCsvButton = document.getElementById("export-csv");
+const exportPdfButton = document.getElementById("export-pdf");
+
+let dailyRows = [];
 
 const fallbackServices = [
   { name: "Manikuere inkl. Shellac", price: 30.0 },
@@ -73,6 +81,9 @@ const setSummary = () => {
 const toggleView = (loggedIn) => {
   loginView.classList.toggle("hidden", loggedIn);
   appView.classList.toggle("hidden", !loggedIn);
+  document
+    .querySelectorAll("[data-view='table']")
+    .forEach((panel) => panel.classList.toggle("hidden", !loggedIn));
 };
 
 const loadServices = async () => {
@@ -139,7 +150,7 @@ const loadRecent = async () => {
   });
 };
 
-const loadDailySummary = async (dateValue) => {
+const loadDailyData = async (dateValue) => {
   if (!dateValue) return;
 
   const start = new Date(`${dateValue}T00:00:00`);
@@ -147,9 +158,66 @@ const loadDailySummary = async (dateValue) => {
 
   const { data, error } = await supabaseClient
     .from("receipts")
-    .select("total_cents,tax_cents")
+    .select(
+      "id,created_at,service_name,total_cents,tax_cents,payment_method"
+    )
     .gte("created_at", start.toISOString())
     .lte("created_at", end.toISOString());
+
+  if (error || !data) {
+    return;
+  }
+
+  dailyRows = data;
+
+  const totals = data.reduce(
+    (acc, row) => {
+      acc.total += row.total_cents || 0;
+      acc.tax += row.tax_cents || 0;
+      acc.count += 1;
+      return acc;
+    },
+    { total: 0, tax: 0, count: 0 }
+  );
+
+  summaryDayTotal.textContent = formatCurrency(totals.total / 100);
+  summaryDayTax.textContent = formatCurrency(totals.tax / 100);
+  summaryDayCount.textContent = `${totals.count}`;
+
+  dailyTableBody.innerHTML = "";
+  data
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .forEach((row) => {
+      const item = document.createElement("tr");
+      const time = new Date(row.created_at).toLocaleTimeString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      item.innerHTML = `
+        <td>#${row.id}</td>
+        <td>${time}</td>
+        <td>${row.service_name}</td>
+        <td>${row.payment_method}</td>
+        <td>${formatCurrency(row.total_cents / 100)}</td>
+        <td>${formatCurrency((row.tax_cents || 0) / 100)}</td>
+      `;
+      dailyTableBody.appendChild(item);
+    });
+};
+
+const loadMonthlySummary = async (dateValue) => {
+  if (!dateValue) return;
+
+  const base = new Date(`${dateValue}T00:00:00`);
+  const monthStart = new Date(base.getFullYear(), base.getMonth(), 1);
+  const monthEnd = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
+
+  const { data, error } = await supabaseClient
+    .from("receipts")
+    .select("total_cents,tax_cents")
+    .gte("created_at", monthStart.toISOString())
+    .lte("created_at", monthEnd.toISOString());
 
   if (error || !data) {
     return;
@@ -165,9 +233,9 @@ const loadDailySummary = async (dateValue) => {
     { total: 0, tax: 0, count: 0 }
   );
 
-  summaryDayTotal.textContent = formatCurrency(totals.total / 100);
-  summaryDayTax.textContent = formatCurrency(totals.tax / 100);
-  summaryDayCount.textContent = `${totals.count}`;
+  summaryMonthTotal.textContent = formatCurrency(totals.total / 100);
+  summaryMonthTax.textContent = formatCurrency(totals.tax / 100);
+  summaryMonthCount.textContent = `${totals.count}`;
 };
 
 const setDefaults = () => {
@@ -197,7 +265,8 @@ loginForm.addEventListener("submit", async (event) => {
   toggleView(true);
   await loadServices();
   await loadRecent();
-  await loadDailySummary(dateInput.value);
+  await loadDailyData(dateInput.value);
+  await loadMonthlySummary(dateInput.value);
 });
 
 receiptForm.addEventListener("submit", async (event) => {
@@ -236,7 +305,8 @@ receiptForm.addEventListener("submit", async (event) => {
   receiptForm.reset();
   setDefaults();
   await loadRecent();
-  await loadDailySummary(dateInput.value);
+  await loadDailyData(dateInput.value);
+  await loadMonthlySummary(dateInput.value);
 });
 
 serviceSelect.addEventListener("change", () => {
@@ -256,7 +326,8 @@ signOutButton.addEventListener("click", async () => {
 });
 
 dateInput.addEventListener("change", () => {
-  loadDailySummary(dateInput.value);
+  loadDailyData(dateInput.value);
+  loadMonthlySummary(dateInput.value);
 });
 
 const init = async () => {
@@ -268,8 +339,119 @@ const init = async () => {
     toggleView(true);
     await loadServices();
     await loadRecent();
-    await loadDailySummary(dateInput.value);
+    await loadDailyData(dateInput.value);
+    await loadMonthlySummary(dateInput.value);
   }
 };
 
 init();
+
+const exportCsv = () => {
+  if (!dailyRows.length) return;
+  const header = [
+    "Beleg",
+    "Datum",
+    "Uhrzeit",
+    "Leistung",
+    "Zahlart",
+    "Brutto",
+    "Steuer",
+  ];
+  const lines = dailyRows.map((row) => {
+    const date = new Date(row.created_at);
+    const dateText = date.toLocaleDateString("de-DE");
+    const timeText = date.toLocaleTimeString("de-DE", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return [
+      row.id,
+      dateText,
+      timeText,
+      row.service_name,
+      row.payment_method,
+      (row.total_cents / 100).toFixed(2).replace(".", ","),
+      ((row.tax_cents || 0) / 100).toFixed(2).replace(".", ","),
+    ];
+  });
+
+  const csvContent = [header, ...lines]
+    .map((line) => line.map((value) => `"${value}"`).join(";"))
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `lia-spa-tagesliste-${dateInput.value}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+const exportPdf = () => {
+  if (!dailyRows.length) return;
+  const dateLabel = dateInput.value;
+  const rows = dailyRows
+    .map((row) => {
+      const date = new Date(row.created_at);
+      const timeText = date.toLocaleTimeString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return `
+        <tr>
+          <td>#${row.id}</td>
+          <td>${timeText}</td>
+          <td>${row.service_name}</td>
+          <td>${row.payment_method}</td>
+          <td>${formatCurrency(row.total_cents / 100)}</td>
+          <td>${formatCurrency((row.tax_cents || 0) / 100)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) return;
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Tagesliste ${dateLabel}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #222; }
+          h1 { font-size: 20px; margin-bottom: 12px; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; }
+          th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background: #f6f6f6; }
+        </style>
+      </head>
+      <body>
+        <h1>Lia Spa Tagesliste - ${dateLabel}</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Beleg</th>
+              <th>Uhrzeit</th>
+              <th>Leistung</th>
+              <th>Zahlart</th>
+              <th>Brutto</th>
+              <th>Steuer</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+};
+
+exportCsvButton.addEventListener("click", exportCsv);
+exportPdfButton.addEventListener("click", exportPdf);

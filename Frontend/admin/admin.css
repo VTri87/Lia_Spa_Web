@@ -196,6 +196,43 @@ textarea {
   gap: 12px;
 }
 
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid #f0e1d8;
+  background: #fff;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.receipt-table th,
+.receipt-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #f1e5de;
+}
+
+.receipt-table th {
+  background: #fdf7f3;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.receipt-table tbody tr:hover {
+  background: #fdf2eb;
+}
+
 @media (max-width: 900px) {
   .app-grid {
     grid-template-columns: 1fr;
