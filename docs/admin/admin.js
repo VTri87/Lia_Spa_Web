@@ -12,6 +12,7 @@ const loginForm = document.getElementById("login-form");
 const loginMessage = document.getElementById("login-message");
 const receiptForm = document.getElementById("receipt-form");
 const receiptMessage = document.getElementById("receipt-message");
+const dateInput = receiptForm.querySelector("input[name='date']");
 const serviceSelect = receiptForm.querySelector("select[name='service']");
 const priceInput = receiptForm.querySelector("input[name='price']");
 const taxSelect = receiptForm.querySelector("select[name='taxRate']");
@@ -19,6 +20,9 @@ const paymentSelect = receiptForm.querySelector("select[name='payment']");
 const summaryTotal = document.getElementById("summary-total");
 const summaryTax = document.getElementById("summary-tax");
 const summaryPayment = document.getElementById("summary-payment");
+const summaryDayTotal = document.getElementById("summary-day-total");
+const summaryDayTax = document.getElementById("summary-day-tax");
+const summaryDayCount = document.getElementById("summary-day-count");
 const recentList = document.getElementById("recent-list");
 const signOutButton = document.getElementById("sign-out");
 
@@ -135,9 +139,40 @@ const loadRecent = async () => {
   });
 };
 
+const loadDailySummary = async (dateValue) => {
+  if (!dateValue) return;
+
+  const start = new Date(`${dateValue}T00:00:00`);
+  const end = new Date(`${dateValue}T23:59:59.999`);
+
+  const { data, error } = await supabaseClient
+    .from("receipts")
+    .select("total_cents,tax_cents")
+    .gte("created_at", start.toISOString())
+    .lte("created_at", end.toISOString());
+
+  if (error || !data) {
+    return;
+  }
+
+  const totals = data.reduce(
+    (acc, row) => {
+      acc.total += row.total_cents || 0;
+      acc.tax += row.tax_cents || 0;
+      acc.count += 1;
+      return acc;
+    },
+    { total: 0, tax: 0, count: 0 }
+  );
+
+  summaryDayTotal.textContent = formatCurrency(totals.total / 100);
+  summaryDayTax.textContent = formatCurrency(totals.tax / 100);
+  summaryDayCount.textContent = `${totals.count}`;
+};
+
 const setDefaults = () => {
   const today = new Date().toISOString().slice(0, 10);
-  receiptForm.date.value = today;
+  dateInput.value = today;
   setSummary();
 };
 
@@ -162,6 +197,7 @@ loginForm.addEventListener("submit", async (event) => {
   toggleView(true);
   await loadServices();
   await loadRecent();
+  await loadDailySummary(dateInput.value);
 });
 
 receiptForm.addEventListener("submit", async (event) => {
@@ -200,6 +236,7 @@ receiptForm.addEventListener("submit", async (event) => {
   receiptForm.reset();
   setDefaults();
   await loadRecent();
+  await loadDailySummary(dateInput.value);
 });
 
 serviceSelect.addEventListener("change", () => {
@@ -218,6 +255,10 @@ signOutButton.addEventListener("click", async () => {
   toggleView(false);
 });
 
+dateInput.addEventListener("change", () => {
+  loadDailySummary(dateInput.value);
+});
+
 const init = async () => {
   toggleView(false);
   setDefaults();
@@ -227,6 +268,7 @@ const init = async () => {
     toggleView(true);
     await loadServices();
     await loadRecent();
+    await loadDailySummary(dateInput.value);
   }
 };
 

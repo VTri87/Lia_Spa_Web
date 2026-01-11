@@ -175,6 +175,12 @@ textarea {
   border-bottom: none;
 }
 
+.summary-divider {
+  height: 1px;
+  background: #f1e5de;
+  margin: 12px 0;
+}
+
 .recent {
   list-style: none;
   display: grid;
