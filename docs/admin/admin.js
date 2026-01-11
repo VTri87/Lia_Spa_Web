@@ -1,3 +1,10 @@
+import {
+  calcTaxFromGross,
+  formatCurrency,
+  formatReceiptNumber,
+  parsePrice,
+} from "./admin-utils.js";
+
 const SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_30NQrYBXJTL4Lu_sISmxaA_S5Kd8rMK";
 
@@ -13,7 +20,7 @@ const loginMessage = document.getElementById("login-message");
 const receiptForm = document.getElementById("receipt-form");
 const receiptMessage = document.getElementById("receipt-message");
 const dateInput = receiptForm.querySelector("input[name='date']");
-const serviceSelect = receiptForm.querySelector("select[name='service']");
+const serviceOptions = document.getElementById("service-options");
 const priceInput = receiptForm.querySelector("input[name='price']");
 const taxInput = receiptForm.querySelector("input[name='taxRate']");
 const paymentSelect = receiptForm.querySelector("select[name='payment']");
@@ -33,12 +40,13 @@ const exportCsvButton = document.getElementById("export-csv");
 const exportPdfButton = document.getElementById("export-pdf");
 
 let dailyRows = [];
+let servicesCatalog = [];
 
 const fallbackServices = [
   { name: "Manikuere inkl. Shellac", price: 30.0 },
   { name: "Pedikuere inkl. Massage", price: 31.0 },
   { name: "Pedikuere inkl. Shellac", price: 43.0 },
-  { name: "Ablosen", price: 15.0 },
+  { name: "Abloesen", price: 15.0 },
   { name: "UV-Gel Natur (Neu)", price: 32.0 },
   { name: "UV-Gel Natur (Auffuellen)", price: 29.0 },
   { name: "UV-Gel French (Neu)", price: 38.0 },
@@ -54,24 +62,11 @@ const fallbackServices = [
   { name: "Reparatur pro Nagel", price: 5.0 },
 ];
 
-const formatCurrency = (value) =>
-  new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-
-const parsePrice = (value) => Math.round(Number(value) * 100);
-
-const calcTaxFromGross = (grossCents, rate) => {
-  if (rate === 0) return 0;
-  return Math.round((grossCents * rate) / (100 + rate));
-};
-
 const getSelectedServices = () =>
-  Array.from(serviceSelect.selectedOptions).map((option) => ({
-    id: option.dataset.id ? Number(option.dataset.id) : null,
-    name: option.value,
-    price: Number(option.dataset.price || 0),
+  Array.from(serviceOptions.querySelectorAll("input:checked")).map((input) => ({
+    id: input.dataset.id ? Number(input.dataset.id) : null,
+    name: input.value,
+    price: Number(input.dataset.price || 0),
   }));
 
 const setSummary = () => {
@@ -98,7 +93,7 @@ const toggleView = (loggedIn) => {
 };
 
 const loadServices = async () => {
-  serviceSelect.innerHTML = "";
+  serviceOptions.innerHTML = "";
   let services = fallbackServices;
 
   const { data, error } = await supabaseClient
@@ -116,16 +111,30 @@ const loadServices = async () => {
     }));
   }
 
-  services.forEach((service) => {
-    const option = document.createElement("option");
-    option.value = service.name;
-    option.textContent = `${service.name} (${formatCurrency(service.price)})`;
-    option.dataset.price = service.price;
-    option.dataset.taxRate = 19;
+  servicesCatalog = services;
+
+  servicesCatalog.forEach((service) => {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    const name = document.createElement("span");
+    const price = document.createElement("span");
+
+    input.type = "checkbox";
+    input.name = "service";
+    input.value = service.name;
+    input.dataset.price = service.price;
+    input.dataset.taxRate = 19;
     if (service.id) {
-      option.dataset.id = service.id;
+      input.dataset.id = service.id;
     }
-    serviceSelect.appendChild(option);
+
+    name.textContent = service.name;
+    price.textContent = formatCurrency(service.price);
+
+    label.appendChild(input);
+    label.appendChild(name);
+    label.appendChild(price);
+    serviceOptions.appendChild(label);
   });
 
   setSummary();
@@ -146,9 +155,11 @@ const loadRecent = async () => {
   data.forEach((row) => {
     const item = document.createElement("li");
     const date = new Date(row.created_at).toLocaleDateString("de-DE");
+    const receiptNumber = formatReceiptNumber(row.created_at, row.id);
+    const paymentLabel = row.payment_method === "karte" ? "Karte" : "Bar";
     item.innerHTML = `
-      <span>#${row.id} ${row.service_name}</span>
-      <strong>${formatCurrency(row.total_cents / 100)} (${row.payment_method})</strong>
+      <span>${receiptNumber} ${row.service_name}</span>
+      <strong>${formatCurrency(row.total_cents / 100)} (${paymentLabel})</strong>
     `;
     item.title = date;
     recentList.appendChild(item);
@@ -173,7 +184,9 @@ const loadDailyData = async (dateValue) => {
     return;
   }
 
-  dailyRows = data;
+  dailyRows = data.sort(
+    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+  );
 
   const totals = data.reduce(
     (acc, row) => {
@@ -190,19 +203,19 @@ const loadDailyData = async (dateValue) => {
   summaryDayCount.textContent = `${totals.count}`;
 
   dailyTableBody.innerHTML = "";
-  data
-    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-    .forEach((row) => {
+  dailyRows.forEach((row) => {
       const item = document.createElement("tr");
       const time = new Date(row.created_at).toLocaleTimeString("de-DE", {
         hour: "2-digit",
         minute: "2-digit",
       });
+      const receiptNumber = formatReceiptNumber(row.created_at, row.id);
+      const paymentLabel = row.payment_method === "karte" ? "Karte" : "Bar";
       item.innerHTML = `
-        <td>#${row.id}</td>
+        <td>${receiptNumber}</td>
         <td>${time}</td>
         <td>${row.service_name}</td>
-        <td>${row.payment_method}</td>
+        <td>${paymentLabel}</td>
         <td>${formatCurrency(row.total_cents / 100)}</td>
         <td>${formatCurrency((row.tax_cents || 0) / 100)}</td>
       `;
@@ -278,8 +291,13 @@ receiptForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   receiptMessage.textContent = "";
 
-  const formData = new FormData(receiptForm);
   const selected = getSelectedServices();
+  if (!selected.length) {
+    receiptMessage.textContent = "Bitte mindestens eine Leistung waehlen.";
+    return;
+  }
+
+  const formData = new FormData(receiptForm);
   const serviceNames = selected.map((item) => item.name).join(" + ");
   const serviceId = selected.length === 1 ? selected[0].id : null;
   const grossCents = parsePrice(formData.get("price"));
@@ -314,7 +332,7 @@ receiptForm.addEventListener("submit", async (event) => {
   await loadMonthlySummary(dateInput.value);
 });
 
-serviceSelect.addEventListener("change", () => {
+serviceOptions.addEventListener("change", () => {
   setSummary();
 });
 
@@ -328,6 +346,8 @@ signOutButton.addEventListener("click", async () => {
 });
 
 dateInput.addEventListener("change", () => {
+  const today = new Date().toISOString().slice(0, 10);
+  dateInput.value = today;
   loadDailyData(dateInput.value);
   loadMonthlySummary(dateInput.value);
 });
@@ -366,12 +386,13 @@ const exportCsv = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+    const receiptNumber = formatReceiptNumber(row.created_at, row.id);
     return [
-      row.id,
+      receiptNumber,
       dateText,
       timeText,
       row.service_name,
-      row.payment_method,
+      row.payment_method === "karte" ? "Karte" : "Bar",
       (row.total_cents / 100).toFixed(2).replace(".", ","),
       ((row.tax_cents || 0) / 100).toFixed(2).replace(".", ","),
     ];
@@ -402,12 +423,13 @@ const exportPdf = () => {
         hour: "2-digit",
         minute: "2-digit",
       });
+      const receiptNumber = formatReceiptNumber(row.created_at, row.id);
       return `
         <tr>
-          <td>#${row.id}</td>
+          <td>${receiptNumber}</td>
           <td>${timeText}</td>
           <td>${row.service_name}</td>
-          <td>${row.payment_method}</td>
+          <td>${row.payment_method === "karte" ? "Karte" : "Bar"}</td>
           <td>${formatCurrency(row.total_cents / 100)}</td>
           <td>${formatCurrency((row.tax_cents || 0) / 100)}</td>
         </tr>

@@ -57,18 +57,18 @@
 
           <div class="app-grid">
             <form class="form" id="receipt-form">
-              <label>
-                Datum
-                <input type="date" name="date" required readonly />
-              </label>
-              <label>
-                Leistung
-                <select name="service" multiple required></select>
-              </label>
-              <label>
-                Preis gesamt (EUR)
-                <input type="number" name="price" step="0.01" min="0" required readonly />
-              </label>
+            <label>
+              Datum
+              <input type="date" name="date" required readonly />
+            </label>
+            <label>
+              Leistung
+              <div class="service-options" id="service-options"></div>
+            </label>
+            <label>
+              Preis gesamt (EUR)
+              <input type="number" name="price" step="0.01" min="0" required readonly />
+            </label>
               <label>
                 Umsatzsteuer
                 <input type="text" name="taxRate" value="19 %" readonly />
@@ -185,6 +185,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="admin.js"></script>
+    <script type="module" src="admin.js"></script>
   </body>
 </html>

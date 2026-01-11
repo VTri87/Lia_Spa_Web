@@ -107,8 +107,27 @@ textarea {
   background: #fff;
 }
 
-select[multiple] {
-  min-height: 140px;
+.service-options {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #ead7cd;
+  background: #fff;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.service-options label {
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.service-options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 textarea {

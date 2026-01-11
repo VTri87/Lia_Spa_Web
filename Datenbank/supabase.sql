@@ -42,7 +42,7 @@ insert into services (name, price_cents, tax_rate, sort_order) values
   ('Manikuere inkl. Shellac', 3000, 19.00, 1),
   ('Pedikuere inkl. Massage', 3100, 19.00, 2),
   ('Pedikuere inkl. Shellac', 4300, 19.00, 3),
-  ('Ablosen', 1500, 19.00, 4),
+  ('Abloesen', 1500, 19.00, 4),
   ('UV-Gel Natur (Neu)', 3200, 19.00, 5),
   ('UV-Gel Natur (Auffuellen)', 2900, 19.00, 6),
   ('UV-Gel French (Neu)', 3800, 19.00, 7),
