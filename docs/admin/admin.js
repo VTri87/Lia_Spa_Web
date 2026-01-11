@@ -8,11 +8,6 @@ import {
 const SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_30NQrYBXJTL4Lu_sISmxaA_S5Kd8rMK";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
 const loginView = document.querySelector("[data-view='login']");
 const appView = document.querySelector("[data-view='app']");
 const loginForm = document.getElementById("login-form");
@@ -38,6 +33,17 @@ const signOutButton = document.getElementById("sign-out");
 const dailyTableBody = document.getElementById("daily-table-body");
 const exportCsvButton = document.getElementById("export-csv");
 const exportPdfButton = document.getElementById("export-pdf");
+
+if (!window.supabase) {
+  loginMessage.textContent =
+    "Supabase konnte nicht geladen werden. Bitte Seite neu laden.";
+  throw new Error("Supabase CDN not available.");
+}
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 let dailyRows = [];
 let servicesCatalog = [];
@@ -276,7 +282,7 @@ loginForm.addEventListener("submit", async (event) => {
   });
 
   if (error) {
-    loginMessage.textContent = "Login fehlgeschlagen.";
+    loginMessage.textContent = `Login fehlgeschlagen: ${error.message}`;
     return;
   }
 
@@ -320,7 +326,7 @@ receiptForm.addEventListener("submit", async (event) => {
   const { error } = await supabaseClient.from("receipts").insert(payload);
 
   if (error) {
-    receiptMessage.textContent = "Speichern fehlgeschlagen.";
+    receiptMessage.textContent = `Speichern fehlgeschlagen: ${error.message}`;
     return;
   }
 
