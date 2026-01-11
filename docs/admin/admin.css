@@ -107,6 +107,10 @@ textarea {
   background: #fff;
 }
 
+select[multiple] {
+  min-height: 140px;
+}
+
 textarea {
   resize: vertical;
 }

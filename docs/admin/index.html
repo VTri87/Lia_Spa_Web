@@ -59,23 +59,19 @@
             <form class="form" id="receipt-form">
               <label>
                 Datum
-                <input type="date" name="date" required />
+                <input type="date" name="date" required readonly />
               </label>
               <label>
                 Leistung
-                <select name="service" required></select>
+                <select name="service" multiple required></select>
               </label>
               <label>
-                Preis (EUR)
-                <input type="number" name="price" step="0.01" min="0" required />
+                Preis gesamt (EUR)
+                <input type="number" name="price" step="0.01" min="0" required readonly />
               </label>
               <label>
-                Steuer (USt)
-                <select name="taxRate">
-                  <option value="19">19 %</option>
-                  <option value="7">7 %</option>
-                  <option value="0">0 %</option>
-                </select>
+                Umsatzsteuer
+                <input type="text" name="taxRate" value="19 %" readonly />
               </label>
               <label>
                 Zahlungsart

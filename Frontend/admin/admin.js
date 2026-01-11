@@ -15,7 +15,7 @@ const receiptMessage = document.getElementById("receipt-message");
 const dateInput = receiptForm.querySelector("input[name='date']");
 const serviceSelect = receiptForm.querySelector("select[name='service']");
 const priceInput = receiptForm.querySelector("input[name='price']");
-const taxSelect = receiptForm.querySelector("select[name='taxRate']");
+const taxInput = receiptForm.querySelector("input[name='taxRate']");
 const paymentSelect = receiptForm.querySelector("select[name='payment']");
 const summaryTotal = document.getElementById("summary-total");
 const summaryTax = document.getElementById("summary-tax");
@@ -67,9 +67,20 @@ const calcTaxFromGross = (grossCents, rate) => {
   return Math.round((grossCents * rate) / (100 + rate));
 };
 
+const getSelectedServices = () =>
+  Array.from(serviceSelect.selectedOptions).map((option) => ({
+    id: option.dataset.id ? Number(option.dataset.id) : null,
+    name: option.value,
+    price: Number(option.dataset.price || 0),
+  }));
+
 const setSummary = () => {
+  const selected = getSelectedServices();
+  const grossTotal = selected.reduce((sum, item) => sum + item.price, 0);
+  priceInput.value = grossTotal.toFixed(2);
+
   const grossCents = parsePrice(priceInput.value || 0);
-  const rate = Number(taxSelect.value || 0);
+  const rate = 19;
   const taxCents = calcTaxFromGross(grossCents, rate);
 
   summaryTotal.textContent = formatCurrency(grossCents / 100);
@@ -110,18 +121,12 @@ const loadServices = async () => {
     option.value = service.name;
     option.textContent = `${service.name} (${formatCurrency(service.price)})`;
     option.dataset.price = service.price;
-    option.dataset.taxRate = service.taxRate ?? 19;
+    option.dataset.taxRate = 19;
     if (service.id) {
       option.dataset.id = service.id;
     }
     serviceSelect.appendChild(option);
   });
-
-  if (serviceSelect.options.length) {
-    const first = serviceSelect.options[0];
-    priceInput.value = first.dataset.price;
-    taxSelect.value = first.dataset.taxRate || "19";
-  }
 
   setSummary();
 };
@@ -274,17 +279,17 @@ receiptForm.addEventListener("submit", async (event) => {
   receiptMessage.textContent = "";
 
   const formData = new FormData(receiptForm);
-  const serviceOption = serviceSelect.options[serviceSelect.selectedIndex];
+  const selected = getSelectedServices();
+  const serviceNames = selected.map((item) => item.name).join(" + ");
+  const serviceId = selected.length === 1 ? selected[0].id : null;
   const grossCents = parsePrice(formData.get("price"));
-  const rate = Number(formData.get("taxRate"));
+  const rate = 19;
   const taxCents = calcTaxFromGross(grossCents, rate);
 
   const payload = {
     created_at: new Date(formData.get("date")).toISOString(),
-    service_id: serviceOption.dataset.id
-      ? Number(serviceOption.dataset.id)
-      : null,
-    service_name: serviceOption.value,
+    service_id: serviceId,
+    service_name: serviceNames || "Unbekannt",
     price_cents: grossCents,
     tax_rate: rate,
     tax_cents: taxCents,
@@ -310,13 +315,10 @@ receiptForm.addEventListener("submit", async (event) => {
 });
 
 serviceSelect.addEventListener("change", () => {
-  const option = serviceSelect.options[serviceSelect.selectedIndex];
-  priceInput.value = option.dataset.price || "";
-  taxSelect.value = option.dataset.taxRate || "19";
   setSummary();
 });
 
-[priceInput, taxSelect, paymentSelect].forEach((input) => {
+[paymentSelect].forEach((input) => {
   input.addEventListener("input", setSummary);
 });
 
