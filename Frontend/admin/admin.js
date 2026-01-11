@@ -6,7 +6,8 @@ import {
 } from "./admin-utils.js";
 
 const SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_30NQrYBXJTL4Lu_sISmxaA_S5Kd8rMK";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcGV0aGZ3Z2tkdWZoeGZ0anhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODI1NzYsImV4cCI6MjA4MzY1ODU3Nn0.jc8Z5XZsLqEZCDLCUU4o7X1jhn24YE_3PZKF3HZtJsc";
 
 const loginView = document.querySelector("[data-view='login']");
 const appView = document.querySelector("[data-view='app']");
