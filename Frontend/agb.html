@@ -1,0 +1,106 @@
+﻿<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lia Spa | AGB</title>
+    <meta name="description" content="Lia Spa - Nagelstudio in Unna." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero" id="top">
+        <nav class="nav">
+          <a class="logo" href="index.html#top">
+            <img src="assets/Nagelstduio%20(2).png" alt="Lia Spa Logo" />
+            <span>Lia Spa</span>
+          </a>
+          <div class="nav-links">
+            <a href="index.html#leistungen">Leistungen</a>
+            <a href="index.html#preise">Preise</a>
+            <a href="index.html#galerie">Galerie</a>
+            <a href="index.html#kontakt">Kontakt</a>
+            <a href="impressum.html">Impressum</a>
+            <a href="agb.html">AGB</a>
+            <a href="datenschutz.html">Datenschutz</a>
+          </div>
+          <a class="cta" href="index.html#termin">Termin anfragen</a>
+        </nav>
+        <div class="hero-content">
+          <div class="hero-text">
+            <p class="eyebrow">Lia Spa</p>
+            <h1>AGB</h1>
+            <p class="lead">Allgemeine Geschäftsbedingungen von Lia Spa.</p>
+          </div>
+        </div>
+        <div class="hero-glow"></div>
+      </header>      <section class="section split" id="agb">
+        <div class="section-heading">
+          <p class="eyebrow">AGB</p>
+          <h2>Allgemeine Geschäftsbedingungen</h2>
+          <p class="section-lead">Verspätungen und Terminabsagen.</p>
+        </div>
+        <div class="legal-card">
+          <div>
+            <h4>Termine und Ausfallgebühren</h4>
+            <p>
+              Termine sind für Sie persönlich freigehaltene Zeit, die von Ihnen
+              gewählten Anwendungen werden speziell für Sie reserviert.
+            </p>
+            <p>
+              Bei verspäteter Ankunft können sich die Anwendungszeiten verkürzen
+              oder sogar ausfallen, um den planmäßigen Beginn der darauffolgenden
+              Behandlungen zu gewährleisten.
+            </p>
+            <p>
+              Sollte der Termin nicht mehr stattfinden können, behalten wir uns
+              das Recht vor, eine Ausfallgebühr in Höhe von bis zu 80% des
+              Behandlungspreises zu berechnen. Selbiges gilt für nicht
+              rechtzeitig (24 Stunden vorher) oder nicht abgesagte Termine.
+            </p>
+            <p>
+              24 Stunden vorher: 50%<br />
+              12 Stunden vorher: 60%<br />
+              Nicht abgesagt und/oder nicht erschienen: 80% des Behandlungspreises
+            </p>
+          </div>
+        </div>
+      </section>      <footer class="footer">
+        <div>
+          <strong>Lia Spa</strong>
+          <span>Nagelstudio in Unna</span>
+        </div>
+        <div>
+          <a href="https://www.facebook.com/p/Lia-Spa-Unna-100087574342851/" target="_blank" rel="noreferrer">
+            Facebook
+          </a>
+          <a href="admin/index.html">Inhaber Login</a>
+          <a href="impressum.html">Impressum</a>
+          <a href="agb.html">AGB</a>
+          <a href="datenschutz.html">Datenschutz</a>
+        </div>
+      </footer>
+    </div>
+    <script>
+      (function () {
+        var nav = document.querySelector(".nav");
+        if (!nav) return;
+        var onScroll = function () {
+          if (window.scrollY > 16) {
+            nav.classList.add("scrolled");
+          } else {
+            nav.classList.remove("scrolled");
+          }
+        };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+      })();
+    </script>
+  </body>
+</html>

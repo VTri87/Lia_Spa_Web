@@ -1,0 +1,100 @@
+﻿<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lia Spa | Impressum</title>
+    <meta name="description" content="Lia Spa - Nagelstudio in Unna." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero" id="top">
+        <nav class="nav">
+          <a class="logo" href="index.html#top">
+            <img src="assets/Nagelstduio%20(2).png" alt="Lia Spa Logo" />
+            <span>Lia Spa</span>
+          </a>
+          <div class="nav-links">
+            <a href="index.html#leistungen">Leistungen</a>
+            <a href="index.html#preise">Preise</a>
+            <a href="index.html#galerie">Galerie</a>
+            <a href="index.html#kontakt">Kontakt</a>
+            <a href="impressum.html">Impressum</a>
+            <a href="agb.html">AGB</a>
+            <a href="datenschutz.html">Datenschutz</a>
+          </div>
+          <a class="cta" href="index.html#termin">Termin anfragen</a>
+        </nav>
+        <div class="hero-content">
+          <div class="hero-text">
+            <p class="eyebrow">Lia Spa</p>
+            <h1>Impressum</h1>
+            <p class="lead">Rechtliche Angaben des Studios.</p>
+          </div>
+        </div>
+        <div class="hero-glow"></div>
+      </header>      <section class="section" id="impressum">
+        <div class="section-heading">
+          <p class="eyebrow">Impressum</p>
+          <h2>Angaben gemäß § 5 TMG</h2>
+          <p class="section-lead">Verantwortlich für den Inhalt dieser Seite.</p>
+        </div>
+        <div class="legal-card">
+          <div>
+            <h4>Lia Spa (Nagelstudio)</h4>
+            <p>Inhaberin: Thi Anh Thoai Nguyen</p>
+            <p>Morgenstrasse 14</p>
+            <p>59423 Unna</p>
+            <p>Deutschland</p>
+          </div>
+          <div>
+            <h4>Kontakt</h4>
+            <p>Telefon: 0151 62429933</p>
+            <p>E-Mail: liaspa@gmx.de</p>
+          </div>
+          <div>
+            <h4>Rechtsform</h4>
+            <p>Einzelunternehmen</p>
+            <p>USt-IdNr.: nicht vorhanden</p>
+          </div>
+        </div>
+      </section>      <footer class="footer">
+        <div>
+          <strong>Lia Spa</strong>
+          <span>Nagelstudio in Unna</span>
+        </div>
+        <div>
+          <a href="https://www.facebook.com/p/Lia-Spa-Unna-100087574342851/" target="_blank" rel="noreferrer">
+            Facebook
+          </a>
+          <a href="admin/index.html">Inhaber Login</a>
+          <a href="impressum.html">Impressum</a>
+          <a href="agb.html">AGB</a>
+          <a href="datenschutz.html">Datenschutz</a>
+        </div>
+      </footer>
+    </div>
+    <script>
+      (function () {
+        var nav = document.querySelector(".nav");
+        if (!nav) return;
+        var onScroll = function () {
+          if (window.scrollY > 16) {
+            nav.classList.add("scrolled");
+          } else {
+            nav.classList.remove("scrolled");
+          }
+        };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+      })();
+    </script>
+  </body>
+</html>
