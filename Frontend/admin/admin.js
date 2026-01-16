@@ -8,6 +8,7 @@ import {
 const SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcGV0aGZ3Z2tkdWZoeGZ0anhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODI1NzYsImV4cCI6MjA4MzY1ODU3Nn0.jc8Z5XZsLqEZCDLCUU4o7X1jhn24YE_3PZKF3HZtJsc";
+const ALLOWED_EMAILS = ["viettri.nguyen87@gmail.com"];
 
 const loginView = document.querySelector("[data-view='login']");
 const appView = document.querySelector("[data-view='app']");
@@ -97,6 +98,33 @@ const toggleView = (loggedIn) => {
   document
     .querySelectorAll("[data-view='table']")
     .forEach((panel) => panel.classList.toggle("hidden", !loggedIn));
+};
+
+const isAllowedUser = (session) => {
+  const email = session?.user?.email?.toLowerCase();
+  return !!email && ALLOWED_EMAILS.includes(email);
+};
+
+const enforceAuth = async () => {
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) {
+    toggleView(false);
+    return;
+  }
+
+  if (!isAllowedUser(data.session)) {
+    await supabaseClient.auth.signOut();
+    toggleView(false);
+    loginMessage.textContent =
+      "Kein Zugriff: Dieses Konto ist nicht freigeschaltet.";
+    return;
+  }
+
+  toggleView(true);
+  await loadServices();
+  await loadRecent();
+  await loadDailyData(dateInput.value);
+  await loadMonthlySummary(dateInput.value);
 };
 
 const loadServices = async () => {
@@ -287,11 +315,7 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  toggleView(true);
-  await loadServices();
-  await loadRecent();
-  await loadDailyData(dateInput.value);
-  await loadMonthlySummary(dateInput.value);
+  await enforceAuth();
 });
 
 receiptForm.addEventListener("submit", async (event) => {
@@ -362,18 +386,14 @@ dateInput.addEventListener("change", () => {
 const init = async () => {
   toggleView(false);
   setDefaults();
-
-  const { data } = await supabaseClient.auth.getSession();
-  if (data.session) {
-    toggleView(true);
-    await loadServices();
-    await loadRecent();
-    await loadDailyData(dateInput.value);
-    await loadMonthlySummary(dateInput.value);
-  }
+  await enforceAuth();
 };
 
 init();
+
+supabaseClient.auth.onAuthStateChange(() => {
+  enforceAuth();
+});
 
 const exportCsv = () => {
   if (!dailyRows.length) return;
