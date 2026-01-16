@@ -9,6 +9,9 @@ const SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcGV0aGZ3Z2tkdWZoeGZ0anhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODI1NzYsImV4cCI6MjA4MzY1ODU3Nn0.jc8Z5XZsLqEZCDLCUU4o7X1jhn24YE_3PZKF3HZtJsc";
 const ALLOWED_EMAILS = ["viettri.nguyen87@gmail.com"];
+const LOGIN_LOCK_KEY = "liaSpaAdminLoginLock";
+const MAX_LOGIN_ATTEMPTS = 3;
+const LOCK_MS = 5 * 60 * 1000;
 
 const loginView = document.querySelector("[data-view='login']");
 const appView = document.querySelector("[data-view='app']");
@@ -103,6 +106,45 @@ const toggleView = (loggedIn) => {
 const isAllowedUser = (session) => {
   const email = session?.user?.email?.toLowerCase();
   return !!email && ALLOWED_EMAILS.includes(email);
+};
+
+const readLoginLock = () => {
+  try {
+    return JSON.parse(localStorage.getItem(LOGIN_LOCK_KEY) || "{}");
+  } catch (error) {
+    return {};
+  }
+};
+
+const writeLoginLock = (state) => {
+  localStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify(state));
+};
+
+const clearLoginLock = () => {
+  localStorage.removeItem(LOGIN_LOCK_KEY);
+};
+
+const getLockRemainingMs = () => {
+  const lock = readLoginLock();
+  if (!lock.lockUntil) return 0;
+  return Math.max(0, lock.lockUntil - Date.now());
+};
+
+const registerFailedLogin = () => {
+  const lock = readLoginLock();
+  const attempts = (lock.attempts || 0) + 1;
+  if (attempts >= MAX_LOGIN_ATTEMPTS) {
+    writeLoginLock({ attempts: 0, lockUntil: Date.now() + LOCK_MS });
+  } else {
+    writeLoginLock({ attempts });
+  }
+};
+
+const formatRemaining = (ms) => {
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 };
 
 const enforceAuth = async () => {
@@ -301,6 +343,14 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginMessage.textContent = "";
 
+  const lockRemaining = getLockRemainingMs();
+  if (lockRemaining > 0) {
+    loginMessage.textContent = `Zu viele Versuche. Bitte in ${formatRemaining(
+      lockRemaining
+    )} erneut versuchen.`;
+    return;
+  }
+
   const formData = new FormData(loginForm);
   const email = formData.get("email");
   const password = formData.get("password");
@@ -311,10 +361,19 @@ loginForm.addEventListener("submit", async (event) => {
   });
 
   if (error) {
-    loginMessage.textContent = `Login fehlgeschlagen: ${error.message}`;
+    registerFailedLogin();
+    const remaining = getLockRemainingMs();
+    if (remaining > 0) {
+      loginMessage.textContent = `Login fehlgeschlagen. Bitte in ${formatRemaining(
+        remaining
+      )} erneut versuchen.`;
+    } else {
+      loginMessage.textContent = "Login fehlgeschlagen. Bitte prüfen Sie Ihre Eingaben.";
+    }
     return;
   }
 
+  clearLoginLock();
   await enforceAuth();
 });
 
