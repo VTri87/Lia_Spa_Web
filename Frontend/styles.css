@@ -379,6 +379,13 @@ a {
   font-size: 14px;
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  justify-content: flex-end;
+}
+
 .legal-card {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
