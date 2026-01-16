@@ -55,12 +55,32 @@ a {
   border-bottom: 1px solid #efe1d9;
   backdrop-filter: blur(8px);
   transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: visible;
 }
 
 .nav.scrolled {
   background: rgba(240, 230, 222, 0.98);
   border-bottom-color: #e7d5cb;
   box-shadow: 0 10px 30px var(--shadow);
+}
+
+.nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 18px;
+  background: inherit;
+  border-bottom: 1px solid #efe1d9;
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 12px 24px rgba(35, 31, 26, 0.08);
+  pointer-events: none;
+}
+
+.nav.scrolled::after {
+  border-bottom-color: #e7d5cb;
+  box-shadow: 0 14px 28px rgba(35, 31, 26, 0.1);
 }
 
 .logo {
