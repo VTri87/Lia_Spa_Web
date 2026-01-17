@@ -306,42 +306,65 @@ loginForm.addEventListener("submit", async (event) => {
   const password = formData.get("password");
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/login-rate-limit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/login-rate-limit`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     const payload = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      loginMessage.textContent =
-        payload.error || "Login fehlgeschlagen. Bitte prüfen Sie Ihre Eingaben.";
+    if (response.ok && payload.session) {
+      const { error: sessionError } = await supabaseClient.auth.setSession({
+        access_token: payload.session.access_token,
+        refresh_token: payload.session.refresh_token,
+      });
+
+      if (sessionError) {
+        loginMessage.textContent =
+          "Login fehlgeschlagen. Bitte erneut versuchen.";
+        return;
+      }
+
+      await enforceAuth();
       return;
     }
 
-    const session = payload.session;
-    if (!session) {
-      loginMessage.textContent =
-        "Login fehlgeschlagen. Bitte erneut versuchen.";
+    if (!response.ok && response.status >= 500) {
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        loginMessage.textContent =
+          "Login fehlgeschlagen. Bitte prüfen Sie Ihre Eingaben.";
+        return;
+      }
+
+      await enforceAuth();
       return;
     }
 
-    const { error: sessionError } = await supabaseClient.auth.setSession({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
-    });
-
-    if (sessionError) {
-      loginMessage.textContent =
-        "Login fehlgeschlagen. Bitte erneut versuchen.";
-      return;
-    }
-
-    await enforceAuth();
-  } catch (error) {
     loginMessage.textContent =
-      "Login fehlgeschlagen. Bitte erneut versuchen.";
+      payload.error || "Login fehlgeschlagen. Bitte prüfen Sie Ihre Eingaben.";
+  } catch (error) {
+    try {
+      const { error: fallbackError } =
+        await supabaseClient.auth.signInWithPassword({ email, password });
+      if (fallbackError) {
+        loginMessage.textContent =
+          "Login fehlgeschlagen. Bitte prüfen Sie Ihre Eingaben.";
+        return;
+      }
+      await enforceAuth();
+    } catch (fallbackError) {
+      loginMessage.textContent =
+        "Login fehlgeschlagen. Bitte erneut versuchen.";
+    }
   }
 });
 
