@@ -1,12 +1,15 @@
 :root {
-  --bg: #f7f3ef;
-  --bg-2: #efe3da;
-  --text: #221f1a;
-  --muted: #5d5248;
-  --accent: #d18b7d;
-  --accent-2: #f3cabb;
-  --card: #fffaf6;
-  --shadow: rgba(35, 31, 26, 0.12);
+  --bg: #f9e2ec;
+  --bg-2: #f0c5d8;
+  --ink: #231019;
+  --muted: #7a5663;
+  --accent: #d94b8a;
+  --accent-2: #f5b3d1;
+  --accent-3: #8a2f5c;
+  --card: #fff7fb;
+  --glass: rgba(255, 247, 251, 0.7);
+  --shadow: rgba(44, 16, 29, 0.08);
+  --shadow-strong: rgba(44, 16, 29, 0.18);
 }
 
 * {
@@ -15,10 +18,18 @@
   padding: 0;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: "Manrope", sans-serif;
-  background: radial-gradient(circle at top, #ffffff, var(--bg));
-  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 5%, rgba(255, 255, 255, 0.9), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(255, 211, 233, 0.8), transparent 55%),
+    linear-gradient(140deg, var(--bg), var(--bg-2));
+  color: var(--ink);
   min-height: 100vh;
 }
 
@@ -29,32 +40,52 @@ a {
 
 .page {
   min-height: 100vh;
-  background: linear-gradient(130deg, var(--bg), var(--bg-2));
+  background:
+    radial-gradient(circle at 0% 40%, rgba(217, 75, 138, 0.18), transparent 60%),
+    radial-gradient(circle at 100% 10%, rgba(138, 47, 92, 0.16), transparent 52%),
+    linear-gradient(120deg, var(--bg), var(--bg-2));
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 6vw;
+  padding: 22px 6vw;
+  background:
+    linear-gradient(120deg, rgba(255, 236, 247, 0.98), rgba(255, 214, 236, 0.96));
+  border-bottom: 1px solid rgba(226, 167, 196, 0.6);
+  box-shadow:
+    0 14px 30px rgba(44, 16, 29, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .brand {
   font-family: "Cormorant Garamond", serif;
   font-size: 30px;
   font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.topbar nav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(217, 75, 138, 0.2);
+  box-shadow: 0 10px 20px rgba(44, 16, 29, 0.08);
+  font-weight: 600;
 }
 
 .container {
-  padding: 24px 6vw 80px;
+  padding: 28px 6vw 80px;
 }
 
 .panel {
-  background: var(--card);
+  background: var(--glass);
   border-radius: 28px;
   padding: 32px;
-  box-shadow: 0 20px 50px var(--shadow);
-  border: 1px solid #f0e1d8;
+  box-shadow: 0 22px 60px var(--shadow);
+  border: 1px solid rgba(226, 167, 196, 0.6);
+  backdrop-filter: blur(8px);
 }
 
 .panel + .panel {
@@ -73,7 +104,8 @@ a {
   margin-bottom: 10px;
 }
 
-.panel h1 {
+.panel h1,
+.panel h2 {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(28px, 4vw, 42px);
   margin-bottom: 8px;
@@ -100,11 +132,20 @@ input,
 select,
 textarea {
   border-radius: 14px;
-  border: 1px solid #ead7cd;
+  border: 1px solid rgba(226, 167, 196, 0.6);
   padding: 12px 14px;
   font-family: inherit;
   font-size: 15px;
   background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(217, 75, 138, 0.6);
+  box-shadow: 0 0 0 3px rgba(217, 75, 138, 0.15);
 }
 
 .service-options {
@@ -112,7 +153,7 @@ textarea {
   gap: 10px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid #ead7cd;
+  border: 1px solid rgba(226, 167, 196, 0.6);
   background: #fff;
   max-height: 200px;
   overflow-y: auto;
@@ -122,7 +163,7 @@ textarea {
   grid-template-columns: 16px 1fr auto;
   align-items: center;
   font-size: 14px;
-  color: var(--text);
+  color: var(--ink);
 }
 
 .service-options input[type="checkbox"] {
@@ -137,20 +178,27 @@ textarea {
 .button {
   padding: 12px 20px;
   border-radius: 999px;
-  border: 1px solid var(--text);
+  border: 1px solid var(--ink);
   background: transparent;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(120deg, var(--accent), #e066a2);
+  border-color: transparent;
   color: #fff;
+  box-shadow: 0 14px 28px rgba(217, 75, 138, 0.2);
 }
 
 .button.ghost {
-  border-color: #d6c0b4;
+  border-color: rgba(217, 75, 138, 0.3);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(44, 16, 29, 0.14);
 }
 
 .form-message {
@@ -179,11 +227,13 @@ textarea {
   border-radius: 22px;
   padding: 20px;
   box-shadow: 0 12px 30px var(--shadow);
+  border: 1px solid rgba(226, 167, 196, 0.4);
 }
 
 .summary-card h2 {
   font-size: 18px;
   margin-bottom: 12px;
+  color: var(--accent-3);
 }
 
 .summary-row {
@@ -191,7 +241,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #f1e5de;
+  border-bottom: 1px solid rgba(226, 167, 196, 0.4);
 }
 
 .summary-row:last-child {
@@ -200,7 +250,7 @@ textarea {
 
 .summary-divider {
   height: 1px;
-  background: #f1e5de;
+  background: rgba(226, 167, 196, 0.4);
   margin: 12px 0;
 }
 
@@ -229,7 +279,7 @@ textarea {
 .table-wrapper {
   overflow-x: auto;
   border-radius: 18px;
-  border: 1px solid #f0e1d8;
+  border: 1px solid rgba(226, 167, 196, 0.4);
   background: #fff;
 }
 
@@ -243,22 +293,28 @@ textarea {
 .receipt-table td {
   padding: 12px 14px;
   text-align: left;
-  border-bottom: 1px solid #f1e5de;
+  border-bottom: 1px solid rgba(226, 167, 196, 0.4);
 }
 
 .receipt-table th {
-  background: #fdf7f3;
+  background: #fff1f7;
   color: var(--muted);
   font-weight: 600;
 }
 
 .receipt-table tbody tr:hover {
-  background: #fdf2eb;
+  background: #ffe8f3;
 }
 
 @media (max-width: 900px) {
   .app-grid {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }
 
