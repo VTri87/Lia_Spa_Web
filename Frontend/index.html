@@ -261,52 +261,70 @@
         </div>
         <div class="booking-card reveal">
           <form class="booking-form" id="booking-form" novalidate>
-            <div class="booking-grid">
-              <label class="field">
-                <span>Vor- und Nachname*</span>
-                <input type="text" name="name" required placeholder="Dein Name" />
-              </label>
-              <label class="field">
-                <span>Telefonnummer*</span>
-                <input type="tel" name="phone" required placeholder="z.B. 0151 123456" />
-              </label>
-              <label class="field">
-                <span>E-Mail (optional)</span>
-                <input type="email" name="email" placeholder="name@email.de" />
-              </label>
-              <label class="field">
-                <span>Behandlung (optional)</span>
-                <input type="text" name="service" placeholder="z.B. Manikuere, Pedikuere" />
-              </label>
+            <div class="booking-grid booking-grid--date">
               <label class="field">
                 <span>Datum (mo - fr)*</span>
                 <input type="date" name="date" id="booking-date" required />
               </label>
-              <label class="field">
-                <span>Uhrzeit*</span>
-                <select name="time" id="booking-time" required>
-                  <option value="">Bitte Datum waehlen</option>
-                </select>
-              </label>
             </div>
-            <label class="field full">
-              <span>Nachricht (optional)</span>
-              <textarea name="message" rows="4" placeholder="Wuensche, Designideen, Hinweise"></textarea>
-            </label>
-            <label class="consent">
-              <input type="checkbox" id="booking-consent" required />
-              <span>
-                Ich stimme zu, dass meine Daten zur Terminabstimmung verarbeitet werden
-                (weitere Infos in der <a href="datenschutz.html">Datenschutzerklaerung</a>).
-              </span>
-            </label>
-            <div class="booking-actions">
-              <button class="button primary" type="submit" id="booking-submit">Termin anfragen</button>
-              <div class="booking-alt">
-                Alternativ: <a href="https://wa.me/4915162429933" target="_blank" rel="noreferrer">WhatsApp</a> oder
-                <a href="https://www.facebook.com/p/Lia-Spa-Unna-100087574342851/" target="_blank" rel="noreferrer">Facebook</a>
+
+            <div class="booking-slot-card">
+              <div class="slot-header">
+                <div>
+                  <span class="slot-title">Uhrzeit waehlen*</span>
+                  <p class="slot-subtitle">Belegte Termine sind rot, freie Termine gruen.</p>
+                </div>
+                <div class="slot-legend">
+                  <span class="legend-item legend-free">Frei</span>
+                  <span class="legend-item legend-busy">Belegt</span>
+                </div>
+              </div>
+              <div class="slot-grid" id="booking-slots" aria-live="polite">
+                <span class="slot-placeholder">Bitte zuerst ein Datum waehlen.</span>
+              </div>
+              <input type="hidden" name="time" id="booking-time" required />
+              <p class="slot-selected" id="booking-selected" aria-live="polite"></p>
+            </div>
+
+            <div class="booking-details hidden" id="booking-details">
+              <div class="booking-grid">
+                <label class="field">
+                  <span>Vor- und Nachname*</span>
+                  <input type="text" name="name" required placeholder="Dein Name" />
+                </label>
+                <label class="field">
+                  <span>Telefonnummer*</span>
+                  <input type="tel" name="phone" required placeholder="z.B. 0151 123456" />
+                </label>
+                <label class="field">
+                  <span>E-Mail (optional)</span>
+                  <input type="email" name="email" placeholder="name@email.de" />
+                </label>
+                <label class="field">
+                  <span>Behandlung (optional)</span>
+                  <input type="text" name="service" placeholder="z.B. Manikuere, Pedikuere" />
+                </label>
+              </div>
+              <label class="field full">
+                <span>Nachricht (optional)</span>
+                <textarea name="message" rows="4" placeholder="Wuensche, Designideen, Hinweise"></textarea>
+              </label>
+              <label class="consent">
+                <input type="checkbox" id="booking-consent" required />
+                <span>
+                  Ich stimme zu, dass meine Daten zur Terminabstimmung verarbeitet werden
+                  (weitere Infos in der <a href="datenschutz.html">Datenschutzerklaerung</a>).
+                </span>
+              </label>
+              <div class="booking-actions">
+                <button class="button primary" type="submit" id="booking-submit">Termin anfragen</button>
+                <div class="booking-alt">
+                  Alternativ: <a href="https://wa.me/4915162429933" target="_blank" rel="noreferrer">WhatsApp</a> oder
+                  <a href="https://www.facebook.com/p/Lia-Spa-Unna-100087574342851/" target="_blank" rel="noreferrer">Facebook</a>
+                </div>
               </div>
             </div>
+
             <p class="booking-note" id="booking-note" aria-live="polite"></p>
           </form>
         </div>
@@ -492,12 +510,26 @@
 
       (function () {
         var dateInput = document.getElementById("booking-date");
-        var timeSelect = document.getElementById("booking-time");
+        var slotsContainer = document.getElementById("booking-slots");
+        var timeInput = document.getElementById("booking-time");
+        var selectedLabel = document.getElementById("booking-selected");
         var submitBtn = document.getElementById("booking-submit");
         var note = document.getElementById("booking-note");
         var form = document.getElementById("booking-form");
         var consent = document.getElementById("booking-consent");
-        if (!dateInput || !timeSelect || !submitBtn || !form || !note || !consent) return;
+        var details = document.getElementById("booking-details");
+        if (
+          !dateInput ||
+          !slotsContainer ||
+          !timeInput ||
+          !selectedLabel ||
+          !submitBtn ||
+          !form ||
+          !note ||
+          !consent ||
+          !details
+        )
+          return;
 
         var SUPABASE_URL = "https://mapethfwgkdufhxftjxc.supabase.co";
         var SUPABASE_ANON_KEY =
@@ -525,46 +557,102 @@
           return day >= 1 && day <= 5;
         }
 
-        function buildSlots() {
-          timeSelect.innerHTML = "";
-          var placeholder = document.createElement("option");
-          placeholder.value = "";
-          placeholder.textContent = "Bitte Uhrzeit waehlen";
-          timeSelect.appendChild(placeholder);
-          for (var h = 10; h <= 18; h += 1) {
-            var option = document.createElement("option");
-            var label = String(h).padStart(2, "0") + ":00";
-            option.value = label;
-            option.textContent = label + " - " + String(h + 1).padStart(2, "0") + ":00";
-            timeSelect.appendChild(option);
-          }
+        var slotTimes = [];
+        for (var h = 10; h <= 18; h += 1) {
+          var startLabel = String(h).padStart(2, "0") + ":00";
+          var endLabel = String(h + 1).padStart(2, "0") + ":00";
+          slotTimes.push({ value: startLabel, label: startLabel + " - " + endLabel });
         }
 
-        function clearSlots() {
-          timeSelect.innerHTML = "";
-          var option = document.createElement("option");
-          option.value = "";
-          option.textContent = "Bitte Datum waehlen";
-          timeSelect.appendChild(option);
+        function showSlotsMessage(message) {
+          slotsContainer.innerHTML = "";
+          var placeholder = document.createElement("span");
+          placeholder.className = "slot-placeholder";
+          placeholder.textContent = message;
+          slotsContainer.appendChild(placeholder);
+        }
+
+        function clearSelection() {
+          timeInput.value = "";
+          selectedLabel.textContent = "";
+          details.classList.add("hidden");
+          var selectedBtn = slotsContainer.querySelector(".slot-btn.is-selected");
+          if (selectedBtn) selectedBtn.classList.remove("is-selected");
+        }
+
+        function renderSlots(booked) {
+          slotsContainer.innerHTML = "";
+          if (!slotTimes.length) {
+            showSlotsMessage("Keine Termine verfuegbar.");
+            return;
+          }
+          slotTimes.forEach(function (slot) {
+            var btn = document.createElement("button");
+            var isBusy = booked.has(slot.value);
+            btn.type = "button";
+            btn.className = "slot-btn " + (isBusy ? "is-busy" : "is-free");
+            btn.textContent = slot.label;
+            btn.disabled = isBusy;
+            if (!isBusy) {
+              btn.addEventListener("click", function () {
+                clearSelection();
+                timeInput.value = slot.value;
+                selectedLabel.textContent = "Ausgewaehlter Termin: " + slot.label;
+                details.classList.remove("hidden");
+                btn.classList.add("is-selected");
+                note.textContent = "";
+              });
+            }
+            slotsContainer.appendChild(btn);
+          });
+        }
+
+        function loadSlotsForDate(dateValue) {
+          if (!dateValue) {
+            showSlotsMessage("Bitte zuerst ein Datum waehlen.");
+            return;
+          }
+          showSlotsMessage("Termine werden geladen...");
+          supabaseClient
+            .from("bookings")
+            .select("booking_time,status")
+            .eq("booking_date", dateValue)
+            .in("status", ["pending", "confirmed"])
+            .then(function (result) {
+              if (result.error) {
+                showSlotsMessage("Termine konnten nicht geladen werden.");
+                return;
+              }
+              var booked = new Set();
+              (result.data || []).forEach(function (row) {
+                if (row.booking_time) booked.add(row.booking_time.slice(0, 5));
+              });
+              renderSlots(booked);
+            });
         }
 
         dateInput.addEventListener("change", function () {
           note.textContent = "";
+          clearSelection();
           if (!dateInput.value) {
-            clearSlots();
+            showSlotsMessage("Bitte zuerst ein Datum waehlen.");
             return;
           }
           var selected = new Date(dateInput.value + "T00:00:00");
           if (!isWeekday(selected)) {
-            clearSlots();
+            showSlotsMessage("Bitte ein Datum von Montag bis Freitag waehlen.");
             note.textContent = "Termine sind nur montags bis freitags moeglich.";
             return;
           }
-          buildSlots();
+          loadSlotsForDate(dateInput.value);
         });
 
         form.addEventListener("submit", function (event) {
           event.preventDefault();
+          if (!timeInput.value) {
+            note.textContent = "Bitte zuerst eine freie Uhrzeit waehlen.";
+            return;
+          }
           if (!form.checkValidity()) {
             note.textContent = "Bitte alle Pflichtfelder ausfuellen und zustimmen.";
             return;
@@ -605,6 +693,8 @@
                 if (result.error.code === "23505") {
                   note.textContent =
                     "Dieser Termin ist leider schon belegt. Bitte eine andere Zeit waehlen.";
+                  clearSelection();
+                  loadSlotsForDate(dateInput.value);
                 } else {
                   note.textContent =
                     "Leider ist ein Fehler aufgetreten. Bitte spaeter erneut versuchen.";
@@ -612,7 +702,8 @@
                 return;
               }
               form.reset();
-              clearSlots();
+              clearSelection();
+              showSlotsMessage("Bitte zuerst ein Datum waehlen.");
               note.textContent =
                 "Danke! Deine Anfrage ist eingegangen. Wir bestaetigen den Termin kurzfristig.";
             })

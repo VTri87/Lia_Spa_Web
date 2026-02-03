@@ -554,6 +554,119 @@ a {
   gap: 18px;
 }
 
+.booking-grid--date {
+  grid-template-columns: minmax(220px, 1fr);
+  max-width: 320px;
+}
+
+.booking-slot-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 167, 196, 0.6);
+  border-radius: 22px;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.slot-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.slot-title {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.slot-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.slot-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.legend-free {
+  background: rgba(40, 168, 94, 0.14);
+  color: #1e6f3c;
+  border-color: rgba(40, 168, 94, 0.25);
+}
+
+.legend-busy {
+  background: rgba(209, 62, 62, 0.12);
+  color: #8a1f1f;
+  border-color: rgba(209, 62, 62, 0.25);
+}
+
+.slot-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+.slot-placeholder {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.slot-btn {
+  border-radius: 14px;
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slot-btn.is-free {
+  background: rgba(40, 168, 94, 0.18);
+  color: #1f6f3d;
+  border-color: rgba(40, 168, 94, 0.35);
+}
+
+.slot-btn.is-free:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 16px rgba(40, 168, 94, 0.18);
+}
+
+.slot-btn.is-busy {
+  background: rgba(209, 62, 62, 0.16);
+  color: #8a1f1f;
+  border-color: rgba(209, 62, 62, 0.3);
+  cursor: not-allowed;
+}
+
+.slot-btn.is-selected {
+  border-color: rgba(35, 16, 25, 0.5);
+  box-shadow: 0 0 0 2px rgba(35, 16, 25, 0.18);
+}
+
+.slot-selected {
+  font-weight: 600;
+  color: var(--accent-3);
+  min-height: 20px;
+}
+
+.booking-details.hidden {
+  display: none;
+}
+
 .booking-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
