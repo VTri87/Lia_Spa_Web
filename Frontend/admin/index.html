@@ -181,6 +181,55 @@
             </table>
           </div>
         </section>
+
+        <section class="panel app-panel hidden" data-view="bookings">
+          <div class="panel-head">
+            <p class="eyebrow">Termine</p>
+            <h2>Buchungen verwalten</h2>
+            <p class="muted">
+              Hier siehst du alle Termin-Anfragen. Du kannst bestaetigen oder stornieren.
+            </p>
+          </div>
+          <div class="table-actions">
+            <label class="filter">
+              Von
+              <input type="date" id="booking-from" />
+            </label>
+            <label class="filter">
+              Bis
+              <input type="date" id="booking-to" />
+            </label>
+            <label class="filter">
+              Status
+              <select id="booking-status-filter">
+                <option value="all">Alle</option>
+                <option value="pending">Offen</option>
+                <option value="confirmed">Bestaetigt</option>
+                <option value="completed">Abgeschlossen</option>
+                <option value="cancelled">Storniert</option>
+              </select>
+            </label>
+            <button class="button ghost" type="button" id="booking-refresh">
+              Aktualisieren
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table class="receipt-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Uhrzeit</th>
+                  <th>Name</th>
+                  <th>Kontakt</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th>Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="booking-table-body"></tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
 

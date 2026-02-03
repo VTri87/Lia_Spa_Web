@@ -541,6 +541,93 @@ a {
   gap: 12px;
 }
 
+.booking-card {
+  background: linear-gradient(140deg, #ffffff, #ffeaf3);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 24px 60px var(--shadow);
+  border: 1px solid rgba(226, 167, 196, 0.45);
+}
+
+.booking-form {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 167, 196, 0.7);
+  background: rgba(255, 255, 255, 0.9);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.consent a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.booking-alt {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.booking-alt a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.booking-note {
+  min-height: 20px;
+  color: var(--accent-3);
+  font-weight: 600;
+}
+
 .contact-card {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

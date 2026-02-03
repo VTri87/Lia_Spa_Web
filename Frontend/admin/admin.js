@@ -35,6 +35,12 @@ const signOutButton = document.getElementById("sign-out");
 const dailyTableBody = document.getElementById("daily-table-body");
 const exportCsvButton = document.getElementById("export-csv");
 const exportPdfButton = document.getElementById("export-pdf");
+const bookingsView = document.querySelector("[data-view='bookings']");
+const bookingTableBody = document.getElementById("booking-table-body");
+const bookingFromInput = document.getElementById("booking-from");
+const bookingToInput = document.getElementById("booking-to");
+const bookingStatusFilter = document.getElementById("booking-status-filter");
+const bookingRefreshButton = document.getElementById("booking-refresh");
 
 if (!window.supabase) {
   loginMessage.textContent =
@@ -94,9 +100,8 @@ const setSummary = () => {
 
 const toggleView = (loggedIn) => {
   loginView.classList.toggle("hidden", loggedIn);
-  appView.classList.toggle("hidden", !loggedIn);
-  document
-    .querySelectorAll("[data-view='table']")
+  [appView, ...document.querySelectorAll("[data-view='table']"), bookingsView]
+    .filter(Boolean)
     .forEach((panel) => panel.classList.toggle("hidden", !loggedIn));
 };
 
@@ -125,6 +130,7 @@ const enforceAuth = async () => {
   await loadRecent();
   await loadDailyData(dateInput.value);
   await loadMonthlySummary(dateInput.value);
+  await loadBookings();
 };
 
 const loadServices = async () => {
@@ -291,10 +297,123 @@ const loadMonthlySummary = async (dateValue) => {
   summaryMonthCount.textContent = `${totals.count}`;
 };
 
+const statusLabelMap = {
+  pending: "Offen",
+  confirmed: "Bestaetigt",
+  completed: "Abgeschlossen",
+  cancelled: "Storniert",
+};
+
+const loadBookings = async () => {
+  if (!bookingTableBody) return;
+  bookingTableBody.innerHTML = "";
+
+  const from = bookingFromInput?.value;
+  const to = bookingToInput?.value;
+  const status = bookingStatusFilter?.value || "all";
+
+  let query = supabaseClient
+    .from("bookings")
+    .select(
+      "id,booking_date,booking_time,name,phone,email,service,message,status,created_at"
+    )
+    .order("booking_date", { ascending: true })
+    .order("booking_time", { ascending: true });
+
+  if (from) {
+    query = query.gte("booking_date", from);
+  }
+  if (to) {
+    query = query.lte("booking_date", to);
+  }
+  if (status !== "all") {
+    query = query.eq("status", status);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data) {
+    const row = document.createElement("tr");
+    row.innerHTML =
+      "<td colspan='7'>Termine konnten nicht geladen werden.</td>";
+    bookingTableBody.appendChild(row);
+    return;
+  }
+
+  if (!data.length) {
+    const row = document.createElement("tr");
+    row.innerHTML = "<td colspan='7'>Keine Termine gefunden.</td>";
+    bookingTableBody.appendChild(row);
+    return;
+  }
+
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    const timeLabel = row.booking_time?.slice(0, 5) || "-";
+    const dateLabel = row.booking_date
+      ? new Date(row.booking_date + "T00:00:00").toLocaleDateString("de-DE")
+      : "-";
+    const statusLabel = statusLabelMap[row.status] || row.status;
+    const contact = [row.phone, row.email].filter(Boolean).join("<br />");
+    const service = row.service || "-";
+    const actionButtons = [];
+
+    if (row.status === "pending") {
+      actionButtons.push(
+        `<button class="button ghost" data-action="confirmed" data-id="${row.id}">Bestaetigen</button>`
+      );
+      actionButtons.push(
+        `<button class="button ghost" data-action="cancelled" data-id="${row.id}">Stornieren</button>`
+      );
+    } else if (row.status === "confirmed") {
+      actionButtons.push(
+        `<button class="button ghost" data-action="completed" data-id="${row.id}">Abschliessen</button>`
+      );
+      actionButtons.push(
+        `<button class="button ghost" data-action="cancelled" data-id="${row.id}">Stornieren</button>`
+      );
+    }
+
+    tr.innerHTML = `
+      <td>${dateLabel}</td>
+      <td>${timeLabel}</td>
+      <td>${row.name || "-"}</td>
+      <td>${contact || "-"}</td>
+      <td>${service}</td>
+      <td><span class="status-pill ${row.status}">${statusLabel}</span></td>
+      <td><div class="booking-actions">${actionButtons.join("")}</div></td>
+    `;
+    if (row.message) {
+      tr.title = row.message;
+    }
+    bookingTableBody.appendChild(tr);
+  });
+};
+
+const updateBookingStatus = async (id, status) => {
+  if (!id || !status) return;
+  const { error } = await supabaseClient
+    .from("bookings")
+    .update({ status })
+    .eq("id", id);
+
+  if (!error) {
+    await loadBookings();
+  }
+};
+
 const setDefaults = () => {
   const today = new Date().toISOString().slice(0, 10);
   dateInput.value = today;
   setSummary();
+
+  if (bookingFromInput && bookingToInput) {
+    const start = new Date();
+    const end = new Date();
+    end.setDate(end.getDate() + 14);
+    bookingFromInput.value = start.toISOString().slice(0, 10);
+    bookingToInput.value = end.toISOString().slice(0, 10);
+  }
 };
 
 loginForm.addEventListener("submit", async (event) => {
@@ -432,6 +551,37 @@ dateInput.addEventListener("change", () => {
   loadDailyData(dateInput.value);
   loadMonthlySummary(dateInput.value);
 });
+
+if (bookingRefreshButton) {
+  bookingRefreshButton.addEventListener("click", loadBookings);
+}
+
+if (bookingStatusFilter) {
+  bookingStatusFilter.addEventListener("change", loadBookings);
+}
+
+if (bookingFromInput) {
+  bookingFromInput.addEventListener("change", loadBookings);
+}
+
+if (bookingToInput) {
+  bookingToInput.addEventListener("change", loadBookings);
+}
+
+if (bookingTableBody) {
+  bookingTableBody.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const action = target.dataset.action;
+    const id = target.dataset.id;
+    if (!action || !id) return;
+    const ok = window.confirm(
+      `Status wirklich auf "${statusLabelMap[action] || action}" setzen?`
+    );
+    if (!ok) return;
+    updateBookingStatus(id, action);
+  });
+}
 
 const init = async () => {
   toggleView(false);

@@ -276,6 +276,18 @@ textarea {
   margin-bottom: 16px;
 }
 
+.filter {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.filter input,
+.filter select {
+  min-width: 160px;
+}
+
 .table-wrapper {
   overflow-x: auto;
   border-radius: 18px;
@@ -304,6 +316,48 @@ textarea {
 
 .receipt-table tbody tr:hover {
   background: #ffe8f3;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f8e7ef;
+  color: var(--accent-3);
+}
+
+.status-pill.pending {
+  background: #fff1d6;
+  color: #8a5a00;
+}
+
+.status-pill.confirmed {
+  background: #e3f7ea;
+  color: #1d6b3f;
+}
+
+.status-pill.completed {
+  background: #e6efff;
+  color: #2b4f9c;
+}
+
+.status-pill.cancelled {
+  background: #ffe2e2;
+  color: #9a2a2a;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booking-actions .button {
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 @media (max-width: 900px) {
