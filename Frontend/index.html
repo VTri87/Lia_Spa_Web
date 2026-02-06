@@ -4,7 +4,86 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lia Spa | Nagelstudio Unna</title>
-    <meta name="description" content="Lia Spa - Nagelstudio in Unna. Pflege, Design und Wohlgefühl für deine Nägel." />
+    <meta name="description" content="Lia Spa - Dein Nagelstudio in Unna. Manikuere, Pedikuere, UV-Gel und Nageldesign. Online-Termin buchen, Mo-Fr 10-19 Uhr." />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Lia Spa | Nagelstudio Unna" />
+    <meta property="og:description" content="Elegante Nagelkunst mit ruhiger Spa-Atmosphaere. Manikuere, Pedikuere, UV-Gel und mehr. Jetzt online Termin buchen!" />
+    <meta property="og:url" content="https://vtri87.github.io/Lia_Spa_Web/" />
+    <meta property="og:image" content="https://vtri87.github.io/Lia_Spa_Web/assets/og-image.png" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content="Lia Spa" />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NailSalon",
+      "name": "Lia Spa",
+      "description": "Nagelstudio in Unna - Manikuere, Pedikuere, UV-Gel und Nageldesign",
+      "url": "https://vtri87.github.io/Lia_Spa_Web/",
+      "image": "https://vtri87.github.io/Lia_Spa_Web/assets/og-image.png",
+      "telephone": "+4915162429933",
+      "email": "liaspa@gmx.de",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Morgenstr 14",
+        "addressLocality": "Unna",
+        "postalCode": "59423",
+        "addressCountry": "DE"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 51.5347,
+        "longitude": 7.6889
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "10:00",
+          "closes": "19:00"
+        }
+      ],
+      "priceRange": "€€",
+      "sameAs": [
+        "https://www.facebook.com/p/Lia-Spa-Unna-100087574342851/",
+        "https://www.instagram.com/LIASPAUNNA/"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Nagelstudio Leistungen",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": { "@type": "Service", "name": "Manikuere inkl. Shellac" },
+            "price": "30.00",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": { "@type": "Service", "name": "Pedikuere inkl. Massage" },
+            "price": "31.00",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": { "@type": "Service", "name": "Pedikuere inkl. Shellac" },
+            "price": "43.00",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": { "@type": "Service", "name": "Abloesen" },
+            "price": "15.00",
+            "priceCurrency": "EUR"
+          }
+        ]
+      }
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,7 +95,10 @@
   <body>
     <nav class="nav">
       <a class="logo" href="#top">
-        <img src="assets/Nagelstduio%20(2).png" alt="Lia Spa Logo" />
+        <picture>
+          <source srcset="assets/logo.webp" type="image/webp" />
+          <img src="assets/logo.png" alt="Lia Spa Logo" width="400" height="400" />
+        </picture>
         <span>Lia Spa</span>
       </a>
       <div class="nav-links">

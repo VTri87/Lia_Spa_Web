@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+
+Sitemap: https://vtri87.github.io/Lia_Spa_Web/sitemap.xml
